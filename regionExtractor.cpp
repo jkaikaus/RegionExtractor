@@ -87,6 +87,30 @@ Mat collapseContour(std::vector<Point> specificContour, Point variance, Mat img)
     return temp;
 }
 
+std::vector<vector<int>> binContours(std::vector<Point> hull, Point mean, size_t numbins, int index, int cols)
+{
+    size_t dimensions = cols/numbins;
+    std::vector<vector<int>> bins(numbins);
+    size_t l = 0;
+    size_t k = 1;
+    size_t binnumber = 0;
+    while (binnumber < numbins)
+    {
+        double lowerbound = l*dimensions;
+        double upperbound = k*dimensions;
+        if ((mean.x >= lowerbound) && (upperbound >= mean.x))
+        {
+            //std::cout << counter << "," << mean.x << "," << lowerbound << "," << upperbound << std::endl;
+            bins[binnumber].push_back(index);
+            break;
+        }
+        l++;
+        k++;
+        binnumber++; 
+    }    
+    return bins;
+}
+
 int main(int argc, char *argv[])
 {
     Mat img = imread("/home/jkaikaus/Lab/regionExtractor/Samples/2.jpg");
@@ -102,7 +126,6 @@ int main(int argc, char *argv[])
     std::vector<vector<Point>> contours;
     std::vector<Vec4i> hierarchy;
     ms(box, regions, Mat());
-    Mat g;
     for (size_t i = 0; i < regions.size(); i++)
    	{
         drawContours(mask,regions,i,Scalar::all(255),1,8, vector<Vec4i>(), 0, Point());
@@ -126,20 +149,22 @@ int main(int argc, char *argv[])
             newcontours2 = scaleHull(2, intmc[j], hull[j], newcontours2);
             newcontours3 = scaleHull(3, intmc[j], hull[j], newcontours3);
             temp = collapseContour(contours[j], mv[j], img);
-           
-            drawContours(img,hull,j,Scalar(0,255,255),2,8, vector<Vec4i>(), 0, Point());
-            drawContours(img,newcontours1,j,Scalar(0,255,0),2,8, vector<Vec4i>(), 0, Point()); 
-            drawContours(img,newcontours2,j,Scalar(0,0,255),2,8, vector<Vec4i>(), 0, Point());
-            drawContours(img,newcontours3,j,Scalar(255,0,0),2,8, vector<Vec4i>(), 0, Point());
-            circle( img, mc[j], 4, Scalar::all(255), -1, 8, 0 );
-            //namedWindow("Image Window", WINDOW_NORMAL );
-            imshow("Image Window", temp);
+            std::vector<vector<int>> bins;
+            bins = binContours(hull[j], mc[j], 10, j, cols);
+            for (size_t k = 0; k < bins[2].size(); k++)
+            {
+                drawContours(img,hull,bins[2][k],Scalar(0,255,255),2,8, vector<Vec4i>(), 0, Point());
+            }
+            //drawContours(img,hull,j,Scalar(0,255,255),2,8, vector<Vec4i>(), 0, Point());
+            //drawContours(img,newcontours1,j,Scalar(0,255,0),2,8, vector<Vec4i>(), 0, Point()); 
+            //drawContours(img,newcontours2,j,Scalar(0,0,255),2,8, vector<Vec4i>(), 0, Point());
+            //drawContours(img,newcontours3,j,Scalar(255,0,0),2,8, vector<Vec4i>(), 0, Point());
+            //circle( img, mc[j], 4, Scalar::all(255), -1, 8, 0 );
+            namedWindow("Image Window", WINDOW_NORMAL );
+            imshow("Image Window", img);
             waitKey(0);
    	    }
    	}
-
-    //imshow("/home/jkaikaus/Lab/regionExtractor/output/Samples/4.jpg", img);
-    //waitKey(0);
    	return 0;
 }
 

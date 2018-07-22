@@ -1,4 +1,4 @@
-# regionExtractor
+# RegionExtractor
 
 This is an unfinished algorithm used to match objects with their corresponding reflections in a marine environment with the goal of assisting in depth analysis. The code was converted to python (not stored in this repository) and then completed. It is one component of a real-time SLAM system that was developed in the Computer Vision research group under former UIUC Professors Soon-Jo Chung and Seth Hutchinson.
 
